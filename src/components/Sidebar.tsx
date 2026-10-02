@@ -1,8 +1,8 @@
-import React from 'react'
+import type React from 'react'
 import { useAuth } from '../context/AuthContext'
 import {
   LayoutDashboard, Users, Banknote, ArrowUpFromLine,
-  TrendingUp, Settings, LogOut, Megaphone, QrCode
+  TrendingUp, LogOut, Megaphone
 } from 'lucide-react'
 
 type Page = 'dashboard' | 'users' | 'payments' | 'withdrawals' | 'tips' | 'campaigns'

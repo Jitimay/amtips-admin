@@ -1,10 +1,26 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { formatBIF, formatDate, statusClass } from '../lib/utils'
-import { RefreshCw, AlertTriangle } from 'lucide-react'
+import { downloadCSV } from '../lib/csv'
+import { RefreshCw, AlertTriangle, Download } from 'lucide-react'
+
+interface WithdrawalItem {
+  id: string
+  amount: number
+  currency: string
+  status: string
+  waiter_id: string
+  payment_account_id: string
+  provider_reference?: string
+  failure_reason?: string
+  created_at: string
+  updated_at: string
+  profiles?: any
+  account_details?: any
+}
 
 export default function WithdrawalsPage() {
-  const [withdrawals, setWithdrawals] = useState<any[]>([])
+  const [withdrawals, setWithdrawals] = useState<WithdrawalItem[]>([])
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState('all')
   const [page, setPage] = useState(0)
@@ -26,10 +42,11 @@ export default function WithdrawalsPage() {
 
     if (statusFilter !== 'all') query = query.eq('status', statusFilter)
     const { data } = await query
+    const items: WithdrawalItem[] = data ?? []
 
     // Also fetch payment account details for each withdrawal
-    if (data && data.length > 0) {
-      const accountIds = data.map(w => w.payment_account_id).filter(Boolean)
+    if (items.length > 0) {
+      const accountIds = items.map(w => w.payment_account_id).filter(Boolean)
       if (accountIds.length > 0) {
         const { data: accounts } = await supabase
           .from('payment_accounts')
@@ -37,13 +54,13 @@ export default function WithdrawalsPage() {
           .in('id', accountIds)
         
         const accountMap = new Map((accounts ?? []).map(a => [a.id, a]))
-        data.forEach(w => {
+        items.forEach(w => {
           w.account_details = accountMap.get(w.payment_account_id)
         })
       }
     }
 
-    setWithdrawals(data ?? [])
+    setWithdrawals(items)
     setLoading(false)
   }
 
@@ -55,6 +72,15 @@ export default function WithdrawalsPage() {
   }
 
   useEffect(() => { load() }, [page, statusFilter])
+
+  async function downloadWithdrawals() {
+    const { data } = await supabase
+      .from('withdrawals')
+      .select('id, waiter_id, amount, currency, status, payment_account_id, provider_reference, failure_reason, created_at, updated_at')
+      .order('created_at', { ascending: false })
+    downloadCSV(`amtips_withdrawals_${new Date().toISOString().slice(0,10)}.csv`, data ?? [])
+  }
+
 
   const pendingCount = withdrawals.filter(w => w.status === 'requested').length
   const totalAmount = withdrawals.reduce((s, w) => s + (w.amount ?? 0), 0)
@@ -74,9 +100,19 @@ export default function WithdrawalsPage() {
             Page total: <span style={{ color: '#22d3a5' }}>{formatBIF(totalAmount)}</span>
           </p>
         </div>
-        <button className="btn-primary" onClick={load} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <RefreshCw size={14} />Refresh
-        </button>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button onClick={downloadWithdrawals} style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            background: 'rgba(34,211,165,0.12)', color: '#22d3a5',
+            border: '1px solid rgba(34,211,165,0.25)', borderRadius: 10,
+            padding: '10px 16px', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+          }}>
+            <Download size={14} />Download CSV
+          </button>
+          <button className="btn-primary" onClick={load} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <RefreshCw size={14} />Refresh
+          </button>
+        </div>
       </div>
 
       {/* Status filter */}

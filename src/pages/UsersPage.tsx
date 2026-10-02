@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { formatBIF, formatDate } from '../lib/utils'
-import { Search, RefreshCw, Star, Building2, MapPin } from 'lucide-react'
+import { downloadCSV } from '../lib/csv'
+import { Search, RefreshCw, Star, Building2, MapPin, Download } from 'lucide-react'
 
 export default function UsersPage() {
   const [users, setUsers] = useState<any[]>([])
@@ -40,6 +41,14 @@ export default function UsersPage() {
     return () => clearTimeout(t)
   }, [search])
 
+  async function downloadUsers() {
+    const { data } = await supabase
+      .from('profiles')
+      .select('id, full_name, username, restaurant_name, city, country, slot, slot_name, average_rating, total_ratings, is_active, created_at')
+      .order('created_at', { ascending: false })
+    downloadCSV(`amtips_users_${new Date().toISOString().slice(0,10)}.csv`, data ?? [])
+  }
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
@@ -47,9 +56,19 @@ export default function UsersPage() {
           <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 4 }}>Users / Waiters</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>All registered profiles in amTips</p>
         </div>
-        <button className="btn-primary" onClick={load} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <RefreshCw size={14} />Refresh
-        </button>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button onClick={downloadUsers} style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            background: 'rgba(34,211,165,0.12)', color: '#22d3a5',
+            border: '1px solid rgba(34,211,165,0.25)', borderRadius: 10,
+            padding: '10px 16px', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+          }}>
+            <Download size={14} />Download CSV
+          </button>
+          <button className="btn-primary" onClick={load} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <RefreshCw size={14} />Refresh
+          </button>
+        </div>
       </div>
 
       {/* Search */}
