@@ -107,14 +107,13 @@ export default function PaymentsPage() {
               <th>Customer Pays</th>
               <th>Status</th>
               <th>Date</th>
-              <th>Action</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={9} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>Loading payments…</td></tr>
+              <tr><td colSpan={8} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>Loading payments…</td></tr>
             ) : payments.length === 0 ? (
-              <tr><td colSpan={9} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>No payments found</td></tr>
+              <tr><td colSpan={8} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>No payments found</td></tr>
             ) : payments.map(p => {
               const profile = p.tips?.profiles
               return (
@@ -132,44 +131,6 @@ export default function PaymentsPage() {
                   <td>{formatBIF(p.customer_pays)}</td>
                   <td><span className={`status-badge ${statusClass(p.status)}`}>{p.status}</span></td>
                   <td style={{ color: 'var(--text-secondary)', fontSize: 12 }}>{formatDate(p.created_at)}</td>
-                  <td>
-                    {p.status !== 'completed' && (
-                      <button
-                        onClick={async () => {
-                          const ref = prompt('Enter Bank / Provider Reference Number (e.g., TREF...):')
-                          if (!ref) return
-                          const now = new Date().toISOString()
-                          await supabase.from('payments').update({
-                            status: 'completed',
-                            confirmed_at: now,
-                            transaction_ref: ref,
-                            payment_method: 'MANUAL_APPROVAL',
-                            updated_at: now
-                          }).eq('id', p.id)
-                          if (p.tip_id) {
-                            await supabase.from('tips').update({
-                              status: 'completed',
-                              transaction_reference: ref,
-                              updated_at: now
-                            }).eq('id', p.tip_id)
-                          }
-                          alert('Payment marked as completed and waiter credited successfully!')
-                          load()
-                        }}
-                        style={{
-                          padding: '4px 10px',
-                          fontSize: 12,
-                          background: 'rgba(34,211,165,0.15)',
-                          color: '#22d3a5',
-                          border: '1px solid rgba(34,211,165,0.3)',
-                          borderRadius: 6,
-                          cursor: 'pointer'
-                        }}
-                      >
-                        Approve
-                      </button>
-                    )}
-                  </td>
                 </tr>
               )
             })}
