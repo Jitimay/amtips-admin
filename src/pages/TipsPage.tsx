@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { formatBIF, formatDate, statusClass } from '../lib/utils'
-import { RefreshCw, Search, Star } from 'lucide-react'
+import { downloadCSV } from '../lib/csv'
+import { RefreshCw, Search, Star, Download } from 'lucide-react'
 
 export default function TipsPage() {
   const [tips, setTips] = useState<any[]>([])
@@ -40,6 +41,14 @@ export default function TipsPage() {
 
   const totalAmount = tips.reduce((s, t) => s + (t.amount ?? 0), 0)
 
+  async function downloadTips() {
+    const { data } = await supabase
+      .from('tips')
+      .select('id, waiter_id, amount, currency, status, rating, message, customer_name, is_anonymous, transaction_reference, payment_provider, created_at')
+      .order('created_at', { ascending: false })
+    downloadCSV(`amtips_tips_${new Date().toISOString().slice(0,10)}.csv`, data ?? [])
+  }
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
@@ -49,9 +58,19 @@ export default function TipsPage() {
             Page total: <span style={{ color: '#22d3a5' }}>{formatBIF(totalAmount)}</span>
           </p>
         </div>
-        <button className="btn-primary" onClick={load} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <RefreshCw size={14} />Refresh
-        </button>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button onClick={downloadTips} style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            background: 'rgba(34,211,165,0.12)', color: '#22d3a5',
+            border: '1px solid rgba(34,211,165,0.25)', borderRadius: 10,
+            padding: '10px 16px', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+          }}>
+            <Download size={14} />Download CSV
+          </button>
+          <button className="btn-primary" onClick={load} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <RefreshCw size={14} />Refresh
+          </button>
+        </div>
       </div>
 
       <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>

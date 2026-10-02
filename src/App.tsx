@@ -1,4 +1,3 @@
-import React from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import LoginPage from './pages/LoginPage'
 import AdminShell from './pages/AdminShell'

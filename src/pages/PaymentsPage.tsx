@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { formatBIF, formatDate, statusClass } from '../lib/utils'
-import { RefreshCw, Search } from 'lucide-react'
+import { downloadCSV } from '../lib/csv'
+import { RefreshCw, Search, Download } from 'lucide-react'
 
 export default function PaymentsPage() {
   const [payments, setPayments] = useState<any[]>([])
@@ -32,6 +33,14 @@ export default function PaymentsPage() {
     setLoading(false)
   }
 
+  async function downloadPayments() {
+    const { data } = await supabase
+      .from('payments')
+      .select('id, tip_id, tip_amount, gateway_fee, platform_fee, customer_pays, currency, status, provider, payment_method, transaction_ref, created_at, confirmed_at')
+      .order('created_at', { ascending: false })
+    downloadCSV(`amtips_payments_${new Date().toISOString().slice(0,10)}.csv`, data ?? [])
+  }
+
   useEffect(() => { load() }, [page, statusFilter])
   useEffect(() => {
     const t = setTimeout(() => { setPage(0); load() }, 400)
@@ -51,9 +60,19 @@ export default function PaymentsPage() {
             Gateway fees: <span style={{ color: '#f59e0b' }}>{formatBIF(totalFees)}</span>
           </p>
         </div>
-        <button className="btn-primary" onClick={load} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <RefreshCw size={14} />Refresh
-        </button>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button onClick={downloadPayments} style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            background: 'rgba(34,211,165,0.12)', color: '#22d3a5',
+            border: '1px solid rgba(34,211,165,0.25)', borderRadius: 10,
+            padding: '10px 16px', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+          }}>
+            <Download size={14} />Download CSV
+          </button>
+          <button className="btn-primary" onClick={load} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <RefreshCw size={14} />Refresh
+          </button>
+        </div>
       </div>
 
       {/* Filters */}

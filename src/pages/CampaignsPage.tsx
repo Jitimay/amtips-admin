@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { formatDate } from '../lib/utils'
-import { RefreshCw, Plus, Trash2, Bell } from 'lucide-react'
+import { RefreshCw, Plus, Trash2 } from 'lucide-react'
 
 export default function CampaignsPage() {
   const [notifications, setNotifications] = useState<any[]>([])
