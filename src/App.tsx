@@ -3,7 +3,8 @@ import LoginPage from './pages/LoginPage'
 import AdminShell from './pages/AdminShell'
 
 function Inner() {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, isReady } = useAuth()
+  if (!isReady) return <div style={{ minHeight: '100vh', background: '#0a0e1a' }} />
   return isAuthenticated ? <AdminShell /> : <LoginPage />
 }
 

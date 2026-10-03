@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/supabase/(.*)",
+      "destination": "/api/supabase.ts"
+    }
+  ]
+}

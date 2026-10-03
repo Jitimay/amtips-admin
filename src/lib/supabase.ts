@@ -1,9 +1,12 @@
 import { createClient } from '@supabase/supabase-js'
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string
-const SUPABASE_SERVICE_ROLE_KEY = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY as string
+// We route all Supabase calls through our secure Vercel API proxy.
+// The proxy holds the service_role key and verifies the HTTP-only admin session cookie.
+const PROXY_URL = '/api/supabase'
 
-// Admin client uses service_role key — bypasses RLS for full read/write access
-export const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+// The anon key is safe to be exposed. We use it just to satisfy the client initialization.
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string || 'dummy-key'
+
+export const supabase = createClient(PROXY_URL, SUPABASE_ANON_KEY, {
   auth: { persistSession: false },
 })

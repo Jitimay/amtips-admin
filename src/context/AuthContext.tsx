@@ -1,37 +1,57 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 
 interface AuthContextType {
   isAuthenticated: boolean
-  login: (password: string) => boolean
-  logout: () => void
+  isReady: boolean
+  login: (password: string) => Promise<boolean>
+  logout: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
 
-const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD ?? 'amtips@admin2026'
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(
-    () => sessionStorage.getItem('admin_auth') === 'true'
-  )
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isReady, setIsReady] = useState(false)
 
-  function login(password: string): boolean {
-    if (password === ADMIN_PASSWORD) {
-      setIsAuthenticated(true)
-      sessionStorage.setItem('admin_auth', 'true')
-      return true
+  useEffect(() => {
+    // Check initial auth status from HTTP-only cookie
+    fetch('/api/login')
+      .then(res => res.json())
+      .then(data => {
+        setIsAuthenticated(!!data.isAuthenticated)
+        setIsReady(true)
+      })
+      .catch(() => setIsReady(true))
+  }, [])
+
+  async function login(password: string): Promise<boolean> {
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      })
+      
+      if (res.ok) {
+        setIsAuthenticated(true)
+        return true
+      }
+      return false
+    } catch {
+      return false
     }
-    return false
   }
 
-  function logout() {
-    setIsAuthenticated(false)
-    sessionStorage.removeItem('admin_auth')
+  async function logout() {
+    try {
+      await fetch('/api/login', { method: 'DELETE' })
+      setIsAuthenticated(false)
+    } catch {}
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, isReady, login, logout }}>
       {children}
     </AuthContext.Provider>
   )

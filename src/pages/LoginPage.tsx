@@ -9,16 +9,14 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
-    setTimeout(() => {
-      const ok = login(password)
-      if (!ok) {
-        setError('Invalid admin password. Please try again.')
-        setLoading(false)
-      }
-    }, 600)
+    const ok = await login(password)
+    if (!ok) {
+      setError('Invalid admin password. Please try again.')
+      setLoading(false)
+    }
   }
 
   return (
