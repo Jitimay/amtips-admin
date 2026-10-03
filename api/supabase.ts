@@ -28,7 +28,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (
         ['content-type', 'accept', 'prefer', 'range', 'content-profile'].includes(key.toLowerCase())
       ) {
-        if (value) headers.set(key, Array.isArray(value) ? value.join(',') : value);
+        if (value) {
+          const strValue = Array.isArray(value) ? value.join(',') : String(value);
+          headers.set(key, strValue);
+        }
       }
     }
 
