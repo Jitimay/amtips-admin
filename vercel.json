@@ -3,6 +3,10 @@
     {
       "source": "/api/supabase/(.*)",
       "destination": "/api/supabase.ts"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
