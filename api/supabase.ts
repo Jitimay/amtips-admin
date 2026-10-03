@@ -55,9 +55,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // 4. Relay response back to client
     const responseData = await response.text();
     
-    // Copy response headers (like content-type, content-range, etc)
+    // Copy only safe response headers
+    const safeHeaders = ['content-type', 'content-range', 'content-profile', 'x-total-count', 'content-location', 'etag', 'last-modified'];
     response.headers.forEach((value, key) => {
-      res.setHeader(key, value);
+      if (safeHeaders.includes(key.toLowerCase())) {
+        res.setHeader(key, value);
+      }
     });
 
     res.status(response.status).send(responseData);
