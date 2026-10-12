@@ -37,3 +37,4 @@ tmp/
 *.sln
 *.sw?
 .vercel
+*firebase-adminsdk*.json

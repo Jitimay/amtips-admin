@@ -2,10 +2,10 @@ import type React from 'react'
 import { useAuth } from '../context/AuthContext'
 import {
   LayoutDashboard, Users, Banknote, ArrowUpFromLine,
-  TrendingUp, LogOut, Megaphone
+  TrendingUp, LogOut, Megaphone, Mail
 } from 'lucide-react'
 
-type Page = 'dashboard' | 'users' | 'payments' | 'withdrawals' | 'tips' | 'campaigns'
+type Page = 'dashboard' | 'users' | 'payments' | 'withdrawals' | 'tips' | 'campaigns' | 'mail'
 
 interface Props {
   current: Page
@@ -19,6 +19,7 @@ const NAV: { id: Page; label: string; icon: React.ReactNode }[] = [
   { id: 'withdrawals', label: 'Withdrawals', icon: <ArrowUpFromLine size={18} /> },
   { id: 'tips', label: 'Tips', icon: <TrendingUp size={18} /> },
   { id: 'campaigns', label: 'Campaigns', icon: <Megaphone size={18} /> },
+  { id: 'mail', label: 'Broadcast Email', icon: <Mail size={18} /> },
 ]
 
 export default function Sidebar({ current, onNavigate }: Props) {

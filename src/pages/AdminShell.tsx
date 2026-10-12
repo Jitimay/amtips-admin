@@ -6,8 +6,9 @@ import PaymentsPage from './PaymentsPage'
 import WithdrawalsPage from './WithdrawalsPage'
 import TipsPage from './TipsPage'
 import CampaignsPage from './CampaignsPage'
+import MailPage from './MailPage'
 
-type Page = 'dashboard' | 'users' | 'payments' | 'withdrawals' | 'tips' | 'campaigns'
+type Page = 'dashboard' | 'users' | 'payments' | 'withdrawals' | 'tips' | 'campaigns' | 'mail'
 
 export default function AdminShell() {
   const [currentPage, setCurrentPage] = useState<Page>('dashboard')
@@ -19,6 +20,7 @@ export default function AdminShell() {
     withdrawals: <WithdrawalsPage />,
     tips: <TipsPage />,
     campaigns: <CampaignsPage />,
+    mail: <MailPage />,
   }
 
   return (

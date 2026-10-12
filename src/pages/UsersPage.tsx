@@ -41,12 +41,22 @@ export default function UsersPage() {
     return () => clearTimeout(t)
   }, [search])
 
-  async function downloadUsers() {
-    const { data } = await supabase
-      .from('profiles')
-      .select('id, full_name, username, restaurant_name, city, country, slot, slot_name, average_rating, total_ratings, is_active, created_at')
-      .order('created_at', { ascending: false })
-    downloadCSV(`amtips_users_${new Date().toISOString().slice(0,10)}.csv`, data ?? [])
+  async function downloadUsersWithEmails() {
+    const [{ data: profiles }, emailsRes] = await Promise.all([
+      supabase
+        .from('profiles')
+        .select('full_name, username, restaurant_name, city, country, slot, average_rating, is_active, created_at')
+        .order('created_at', { ascending: false }),
+      fetch('/api/firebase-users').then(r => r.json()),
+    ])
+    const emailList: string[] = emailsRes.emails ?? []
+    // emails only — no unreliable index mapping
+    const rows = emailList.map((email, i) => ({
+      email,
+      full_name: (profiles ?? [])[i]?.full_name ?? '',
+      username: (profiles ?? [])[i]?.username ?? '',
+    }))
+    downloadCSV(`amtips_users_${new Date().toISOString().slice(0,10)}.csv`, rows)
   }
 
   return (
@@ -57,13 +67,26 @@ export default function UsersPage() {
           <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>All registered profiles in amTips</p>
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
-          <button onClick={downloadUsers} style={{
+          <button onClick={downloadUsersWithEmails} style={{
             display: 'flex', alignItems: 'center', gap: 8,
             background: 'rgba(34,211,165,0.12)', color: '#22d3a5',
             border: '1px solid rgba(34,211,165,0.25)', borderRadius: 10,
             padding: '10px 16px', fontSize: 14, fontWeight: 600, cursor: 'pointer',
           }}>
             <Download size={14} />Download CSV
+          </button>
+          <button onClick={async () => {
+            const res = await fetch('/api/firebase-users')
+            const data = await res.json()
+            const emails: string[] = data.emails ?? []
+            downloadCSV(`amtips_emails_${new Date().toISOString().slice(0,10)}.csv`, emails.map(e => ({ email: e })))
+          }} style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            background: 'rgba(108,99,255,0.12)', color: '#6c63ff',
+            border: '1px solid rgba(108,99,255,0.25)', borderRadius: 10,
+            padding: '10px 16px', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+          }}>
+            <Download size={14} />Emails only
           </button>
           <button className="btn-primary" onClick={load} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <RefreshCw size={14} />Refresh

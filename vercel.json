@@ -5,6 +5,14 @@
       "destination": "/api/supabase.ts"
     },
     {
+      "source": "/api/mail",
+      "destination": "/api/mail.ts"
+    },
+    {
+      "source": "/api/firebase-users",
+      "destination": "/api/firebase-users.ts"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
