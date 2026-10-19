@@ -48,6 +48,7 @@ export default function PaymentsPage() {
   }, [search])
 
   const totalTipAmount = payments.reduce((s, p) => s + (p.tip_amount ?? 0), 0)
+  const totalPlatformFees = payments.reduce((s, p) => s + (p.platform_fee ?? 0), 0)
   const totalFees = payments.reduce((s, p) => s + (p.gateway_fee ?? 0), 0)
 
   return (
@@ -57,6 +58,7 @@ export default function PaymentsPage() {
           <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 4 }}>Payments</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>
             All payment transactions · Page total: <span style={{ color: '#22d3a5' }}>{formatBIF(totalTipAmount)}</span> ·
+            Platform fees: <span style={{ color: '#6c63ff' }}>{formatBIF(totalPlatformFees)}</span> ·
             Gateway fees: <span style={{ color: '#f59e0b' }}>{formatBIF(totalFees)}</span>
           </p>
         </div>
@@ -103,6 +105,7 @@ export default function PaymentsPage() {
               <th>Waiter</th>
               <th>Provider / Method</th>
               <th>Tip Amount</th>
+              <th>Platform Fee</th>
               <th>Gateway Fee</th>
               <th>Customer Pays</th>
               <th>Status</th>
@@ -111,9 +114,9 @@ export default function PaymentsPage() {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={8} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>Loading payments…</td></tr>
+              <tr><td colSpan={9} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>Loading payments…</td></tr>
             ) : payments.length === 0 ? (
-              <tr><td colSpan={8} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>No payments found</td></tr>
+              <tr><td colSpan={9} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>No payments found</td></tr>
             ) : payments.map(p => {
               const profile = p.tips?.profiles
               return (
@@ -127,6 +130,7 @@ export default function PaymentsPage() {
                     <span style={{ textTransform: 'uppercase', fontWeight: 600, fontSize: 12, color: '#6c63ff' }}>{p.provider ?? p.payment_method ?? '—'}</span>
                   </td>
                   <td style={{ color: '#22d3a5', fontWeight: 700 }}>{formatBIF(p.tip_amount)}</td>
+                  <td style={{ color: '#6c63ff' }}>{formatBIF(p.platform_fee)}</td>
                   <td style={{ color: '#f59e0b' }}>{formatBIF(p.gateway_fee)}</td>
                   <td>{formatBIF(p.customer_pays)}</td>
                   <td><span className={`status-badge ${statusClass(p.status)}`}>{p.status}</span></td>

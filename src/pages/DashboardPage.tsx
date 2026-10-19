@@ -320,7 +320,7 @@ export default function DashboardPage() {
             <h3 style={{ fontWeight: 600, fontSize: 16, marginBottom: 20 }}>💼 Payment Fee Breakdown (Completed Transactions)</h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 20 }}>
               {[
-                { label: 'Waiter Tip Amount', value: formatBIF(stats!.totalTipAmountFromPayments), color: '#6c63ff', pct: null },
+                { label: 'Waiter Tip Amount', value: formatBIF(stats!.totalTipAmountFromPayments), color: '#6c63ff', pct: stats!.totalCustomerPays > 0 ? ((stats!.totalTipAmountFromPayments / stats!.totalCustomerPays) * 100).toFixed(1) + '%' : '—' },
                 { label: 'Platform Fee (amTips)', value: formatBIF(stats!.totalPlatformFees), color: '#22d3a5', pct: stats!.totalCustomerPays > 0 ? ((stats!.totalPlatformFees / stats!.totalCustomerPays) * 100).toFixed(1) + '%' : '—' },
                 { label: 'Gateway Fee (Provider)', value: formatBIF(stats!.totalGatewayFees), color: '#f59e0b', pct: stats!.totalCustomerPays > 0 ? ((stats!.totalGatewayFees / stats!.totalCustomerPays) * 100).toFixed(1) + '%' : '—' },
                 { label: 'Total Customer Charged', value: formatBIF(stats!.totalCustomerPays), color: '#a78bfa', pct: '100%' },
